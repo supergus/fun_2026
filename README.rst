@@ -3,119 +3,115 @@ Having Fun with Fun!
 
 The ``fun`` package contains utilities that are entertaining yet somewhat useful. Maybe.
 
-
 Installation
--------------
+------------
 
-To install normally:
+.. code-block:: bash
 
-    ``$ pip install fun-supergus``
+    pip install fun-supergus              # core, no dependencies
+    pip install "fun-supergus[dotenv]"    # also load credentials from a .env file
 
-To install locally in 'editable mode', clone the `GitHub repo`_ and run:
+For development, clone the `GitHub repo`_ and run:
 
-    ``$ pip install -e /path/to/package/fun``
+.. code-block:: bash
 
-The package does not have any dependencies and was tested with Python 3.7.
+    pip install -e ".[dev,dotenv]"
+    ruff check . && pytest
 
-Contact `me`_ if you have any questions. This is a project just for fun (obviously!) and I cannot
-guarantee a response, sorry.
+Requires Python 3.10 or newer (tested on 3.10-3.13).
 
-.. _GitHub repo: https://github.com/supergus/fun
-.. _me: mailto:christopher.couch@gmail.com
-
-Configuration
--------------
-
-The communications module requires an email account to establish an SMTP session.
-You must configure the credentials listed at the top of ``fun/communications/communicator.py``.
-
-If you installed normally, you must navigate to the site-packages library of your current
-Python environment and edit the file.
-
-If you installed in editable mode, you may prefer to edit the cloned repo using your favorite IDE.
+.. _GitHub repo: https://github.com/supergus/fun_2026
 
 Package Contents
 ----------------
 
-The ``fun`` repository contains three folders:
+* ``fun.communications``: E.T.'s communicator. Send email (SMTP), SMS (Twilio) and push
+  notifications (ntfy) with a single command.
+* ``fun.printing``: Print fancy, formatted text to the console.
+* ``fun/bin``: Executable examples.
 
-* ``communications``: Use E.T's communicator to send emails and SMS messages with a single command.
-* ``printing``:  Print fancy, formatted text to the console and flaunt your style.
-* ``bin``:  Executable examples.
+Configuration
+-------------
 
-After importing ``fun`` into your code, the utilities should be called directly using
-``fun.<function>``. See examples below.
+Credentials are read from environment variables. Copy ``.env.example`` to ``.env`` (git-ignored;
+loaded automatically if ``python-dotenv`` is installed) or export them in your shell:
+
+* ``FUN_SMTP_HOST``: SMTP server, e.g. ``smtp.gmail.com``
+* ``FUN_SMTP_PORT``: Default ``587`` (STARTTLS)
+* ``FUN_SMTP_USER``: SMTP login
+* ``FUN_SMTP_PASSWORD``: SMTP password (for Gmail use an App Password)
+* ``FUN_SMTP_FROM``: From address (defaults to ``FUN_SMTP_USER``)
+* ``FUN_EMAIL_LOGO_FILE``: Optional image embedded at the bottom of HTML emails
+* ``TWILIO_ACCOUNT_SID``: Twilio account SID
+* ``TWILIO_AUTH_TOKEN``: Twilio auth token
+* ``TWILIO_FROM_NUMBER``: Your Twilio number in E.164, e.g. ``+15555550123``
+* ``FUN_NTFY_SERVER``: Default ``https://ntfy.sh``
+* ``FUN_NTFY_TOPIC``: Default topic when a recipient has no ``ntfy_topic``
+* ``FUN_NTFY_TOKEN``: Optional ntfy access token
+
+Note: sending SMS to US numbers through Twilio requires A2P 10DLC registration (or a verified
+toll-free number). If the messages are only for you, ntfy push is far simpler.
+
+The contact directory lives at ``fun/communications/contact_list.json``; pass ``contacts=`` to
+use your own file. Users may have ``email``, ``mobile`` and an optional ``ntfy_topic``.
 
 How to Have Fun with E.T.'s Communicator!
 -----------------------------------------
-
-First, import the package:
 
 .. code-block:: python
 
     from fun import et
 
-Try sending some messages. The communicator *should* work regardless of whether you are inside a
-company's managed network or not, assuming you are running from an authenticated session.
+    # Arbitrary phone numbers or emails (10-digit numbers are treated as US +1)
+    et.phone_home('Howdy, this is my message to you.', '734-555-5555', subject='Test message')
 
-.. code-block:: python
-
-    # Using arbitrary phone numbers or emails:
-    et.phone_home('Howdy, this is my message to you.', '734-555-5555', subject='Test message from Chris')
-
-    # Using the JSON directory in fun/communications/contact_list.json to target users:
+    # Users and groups from the contact directory
     et.phone_home('There can never be too much foo.', 'joe', subject='Foo')
-
-    # Using the JSON directory to target groups:
     et.phone_home('Fear is the mindkiller.', ['admin', 'physics'], subject='I must not fear')
 
-When using users or groups from the JSON directory, by default E.T. will send messages via email and SMS
-to each targeted person. You can modify this behavior by toggling the boolean options ``disable_sms`` and
-``disable_email``.
+    # Choose channels: defaults are email=True, sms=True, push=False
+    et.phone_home('Need those reports today.', 'physics', subject='TPS Reports', sms=False)
+    et.phone_home('Build finished', 'chris', email=False, sms=False, push=True)
 
-When providing explicit phone numbers or email addresses, you don't need to worry about toggling the options -
-it's handled automatically. Phone numbers can be any format, including an integer, but they must contain 10 digits
-after any leading 0s or 1s.
+    # Attachments (email only)
+    et.phone_home('Check this out!', 'chris@somewhere.com', subject='Report',
+                  attachment='/documents/tps_report.xlsx')
 
-The contact directory is located at ``fun/communications/contact_list.json`` and can be edited freely.
-
-Let's use the directory and select either email or SMS:
+``phone_home()`` returns a ``SendResult``:
 
 .. code-block:: python
 
-    # Only send emails to the group 'physics', no SMS:
-    et.phone_home('Need those reports today.', 'physics', subject='TPS Reports', disable_sms=True)
+    result = et.phone_home('Hello', 'admin')
+    if not result.ok:
+        for d in result.failed:
+            print(d.channel, d.recipient, d.error)
 
-    # Only send SMS messages to the user 'joe', no emails:
-    et.phone_home('There is no try.', 'joe', subject='Do or do not', disable_email=True)
+Custom senders
+~~~~~~~~~~~~~~
 
-
-
-Finally, you can add attachments to emails:
+Any object with a ``channel`` attribute and a ``send(message, recipients)`` method returning a list
+of ``DeliveryResult`` can be plugged in:
 
 .. code-block:: python
 
-    # Send email with attachment:
-    target='/documents/tps_report.xlsx'     # A Path-like object
-    et.phone_home('Check this out!', 'chris@somewhere.com', subject='Report', attachment=target)
+    from fun.communications.senders import SenderSet, SmtpEmailSender, NtfyPushSender
+
+    et.phone_home('Hi', 'chris', senders=SenderSet(email=SmtpEmailSender(), push=NtfyPushSender()),
+                  push=True)
 
 How to Have Fun with Fancy Printing!
 ------------------------------------
-
-After importing the package, try printing some formatted text to the stdout console:
 
 .. code-block:: python
 
     from fun import fancy_print
 
-    # See the docstring of fancy_print() for description of all options.
     fancy_print('I like pretty things', fg='light_pink', bold=True, framed=True)
-
-Run the built-in demo to see everything the Fancy Printer can do:
-
-.. code-block:: python
-
-    # Run the built-in demo
-    fancy_print('Foo Fighters Rule', demo=True)
+    fancy_print('Foo Fighters Rule', demo=True)   # built-in demo
 
 That's all for now. Be sure to have some Fun!
+
+License
+-------
+
+MIT. See ``LICENSE``.
