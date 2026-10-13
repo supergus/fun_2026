@@ -1,9 +1,10 @@
-"""This is the mostest awesomeset package EVAR."""
+"""Fun: a small toolkit of entertaining yet somewhat useful utilities."""
 
 __author__ = "Christopher Couch"
-__license__ = "Strictly proprietary for Liveline Technologies, Inc."
-__version__ = "2020-11"
+__license__ = "MIT"
+__version__ = "0.2.0"
 
-
-from fun.printing.formatted_console_print import fancy_print
 from fun.communications import communicator as et
+from fun.printing.formatted_console_print import fancy_print
+
+__all__ = ["et", "fancy_print", "__version__"]

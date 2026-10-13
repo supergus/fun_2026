@@ -1,26 +1,20 @@
 {
-    "groups":	{
-        "admin":	[
-            "chris",
-            "joe"
-        ],
-        "controls":	[
-            "chris"
-        ],
-        "physics":	[
-            "chris"
-        ]
+    "groups": {
+        "admin": ["chris", "joe"],
+        "controls": ["chris"],
+        "physics": ["chris"]
     },
-    "users":	{
-        "chris":	{
-            "email":	"chris@somewhere.com",
-            "full_name":	"Christopher Couch",
-            "mobile":	"734.555.5555"
+    "users": {
+        "chris": {
+            "email": "chris@somewhere.com",
+            "full_name": "Christopher Couch",
+            "mobile": "734.555.5555",
+            "ntfy_topic": "chris-alerts-change-me"
         },
-        "joe":	{
-            "email":	"joe@somewhere.com",
-            "full_name":	"Joseph Hernandez",
-            "mobile":	"248.555.5555"
+        "joe": {
+            "email": "joe@somewhere.com",
+            "full_name": "Joseph Hernandez",
+            "mobile": "248.555.5555"
         }
     }
 }

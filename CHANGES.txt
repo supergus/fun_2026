@@ -1,1 +1,18 @@
-# No changes yet
+0.2.0 (2026-10)
+---------------
+* Python 3.10-3.13 support; packaging moved from setup.py to pyproject.toml (hatchling).
+  Dropped setuptools_scm.
+* License is MIT throughout; removed Liveline branding (logo file and link).
+* Credentials now come from environment variables / optional .env (python-dotenv). See .env.example.
+* New pluggable senders: SmtpEmailSender, TwilioSmsSender, NtfyPushSender.
+* Removed carrier email-to-SMS gateway support (sms_email_stubs.json); carriers have shut these down.
+* phone_home() now takes email=/sms=/push= flags and returns a SendResult with per-recipient
+  success/failure. disable_email/disable_sms still work but are deprecated.
+* Fixes: no more bare excepts; attachment filenames set correctly; email validation accepts dots,
+  plus tags and subdomains; no "None" Subject header; HTML body is escaped; examples match the API.
+* Phone numbers normalized to E.164 (+1 default for 10-digit US numbers).
+* Added pytest tests, ruff config and a GitHub Actions CI workflow.
+
+0.1.4 (2020-11)
+---------------
+* Last release of the original package.

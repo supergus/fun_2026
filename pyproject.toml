@@ -1,0 +1,51 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "fun-supergus"
+version = "0.2.0"
+description = "Toolkit for various fun and useful tasks"
+readme = "README.rst"
+requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Christopher Couch", email = "christopher.couch@gmail.com" }]
+keywords = ["fun", "utilities", "email", "sms", "ntfy", "twilio"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dotenv = ["python-dotenv>=1.0"]
+dev = ["pytest>=8", "ruff>=0.6"]
+
+[project.urls]
+Source = "https://github.com/supergus/fun_2026"
+
+[tool.hatch.build.targets.wheel]
+packages = ["fun"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "S", "SIM", "E722"]
+ignore = ["S101"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S105", "S106"]
+"fun/printing/formatted_console_print.py" = ["E501", "UP", "SIM", "B"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,7 +1,7 @@
 """Up your Python console game with formatted text!
 
 Requirements:
-    * Python 3.7+
+    * Python 3.10+
 
 Works great in JetBrains PyCharm console.
 No idea about other consoles!
@@ -12,7 +12,7 @@ Try:    ``>>> p = FancyPrinter().demo()``
 
 __author__ = "Christopher Couch"
 __license__ = "MIT"
-__version__ = "2020-06"
+__version__ = "0.2.0"
 
 
 class FancyPrinter(object):
@@ -214,7 +214,6 @@ class FancyPrinter(object):
         # Special foreground "color" options
         # =========================================================
 
-        special_color_list = ['normal', 'hlink', 'warning', 'error']
 
         # Handle normal option
         if f == 'normal':
@@ -264,11 +263,16 @@ class FancyPrinter(object):
 
         # Build list of formatting attributes
         attributes = list()
-        if bold: attributes.append('1')
-        if underscore: attributes.append('4')
-        if italic: attributes.append('3')
-        if strikethrough: attributes.append('9')
-        if framed: attributes.append('51')
+        if bold:
+            attributes.append('1')
+        if underscore:
+            attributes.append('4')
+        if italic:
+            attributes.append('3')
+        if strikethrough:
+            attributes.append('9')
+        if framed:
+            attributes.append('51')
 
         code = ';'.join(attributes)
         code = ';' + code if len(code) > 0 else code
